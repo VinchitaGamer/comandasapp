@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ============================================
+   DESIGN SYSTEM — SourDas Restaurant POS
+   Material Design 3 · Dark Theme · Emerald
+   ============================================ */
+
+:root {
+  /* Surface Colors */
+  --surface-dim: #0d1117;
+  --surface: #131a24;
+  --surface-bright: #1b2433;
+  --surface-container: #161d27;
+  --surface-highest: #232d3d;
+  --overlay: #0d1117e6;
+
+  /* Primary (Emerald) */
+  --primary: #34d399;
+  --primary-hover: #6ee7b7;
+  --primary-muted: rgba(52, 211, 153, 0.15);
+  --primary-on: #022c22;
+  --primary-glow: rgba(52, 211, 153, 0.2);
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-disabled: #475569;
+
+  /* Borders */
+  --border-default: #1e293b;
+  --border-hover: #334155;
+  --border-focus: #34d399;
+
+  /* Elevation Shadows */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-2: 0 4px 6px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-3: 0 10px 20px rgba(0,0,0,0.4), 0 6px 6px rgba(0,0,0,0.3);
+  --shadow-4: 0 14px 28px rgba(0,0,0,0.5), 0 10px 10px rgba(0,0,0,0.3);
+
+  /* Status Colors */
+  --status-pending: #60a5fa;
+  --status-processing: #fbbf24;
+  --status-ready: #34d399;
+  --status-delivered: #818cf8;
+  --status-error: #f87171;
+  --status-urgent: #fb923c;
+}
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--surface-dim);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+@keyframes pulseUrgent {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(248, 113, 113, 0); }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-pulse-urgent {
+  animation: pulseUrgent 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   SCROLLBAR (Minimal Dark)
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ============================================
+   FOCUS RING UTILITY
+   ============================================ */
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-muted);
+  border-color: var(--border-focus);
+}

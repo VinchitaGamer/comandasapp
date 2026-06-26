@@ -3,9 +3,8 @@
 *.py[cod]
 *$py.class
 backend/venv/
-backend/database.db
-backend/database.db-shm
-backend/database.db-wal
+backend/database_data/
+backend/database.db*
 backend/reporte_arqueo_simulado_turno.pdf
 
 # Node

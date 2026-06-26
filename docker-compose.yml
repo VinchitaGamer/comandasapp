@@ -10,8 +10,9 @@ services:
     environment:
       - SECRET_KEY=super-secret-key-change-it-in-production-1234567890
       - CORS_ORIGINS=https://comandas.sourdev.app,http://localhost:3000
+      - DATABASE_URL=sqlite:////app/database_data/database.db
     volumes:
-      - ./backend/database.db:/app/database.db
+      - ./backend/database_data:/app/database_data
 
   frontend:
     build: 

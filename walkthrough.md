@@ -190,3 +190,18 @@ Cumpliendo con `vps_upload.md`, para levantar la aplicación en producción en t
    `docker-compose up -d --build`
 5. Configura Nginx en el host para redirigir el tráfico del dominio `comandas.sourdev.app` a los puertos `3000` (Frontend) y `/api`, `/ws` al puerto `8000` (Backend).
 6. Genera tu certificado SSL con `certbot --nginx -d comandas.sourdev.app`.
+
+---
+
+## Estado de Despliegue en Producción (VPS)
+
+El sistema ha sido desplegado y configurado de forma totalmente automática y exitosa en el VPS de producción:
+- **Dominio de Producción**: [https://comandas.sourdev.app](https://comandas.sourdev.app)
+- **Endpoint de Salud de la API**: [https://comandas.sourdev.app/api/health](https://comandas.sourdev.app/api/health)
+
+### Configuración del Servidor Realizada:
+1. **Docker y Docker Compose**: Instalados y levantados con éxito en segundo plano.
+2. **Nginx (Proxy Inverso)**: Configurado y enrutado para despachar el frontend (puerto 3000), la API REST (`/api/`) y las conexiones en tiempo real por WebSockets (`/ws`).
+3. **Persistencia Segura (SQLite)**: Configurado el directorio `./backend/database_data` mapeado al contenedor para garantizar la persistencia del archivo de base de datos SQLite y sus archivos de concurrencia WAL sin colisionar con montajes del sistema operativo.
+4. **Certificado SSL Activo**: Generado e instalado el certificado SSL de Let's Encrypt para `comandas.sourdev.app` a través de Certbot, forzando la redirección automática de tráfico no seguro HTTP a HTTPS seguro.
+

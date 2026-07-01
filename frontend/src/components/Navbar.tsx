@@ -2,7 +2,7 @@ import { useStore } from "@/store";
 import { LogOut, User as UserIcon } from "lucide-react";
 
 export default function Navbar() {
-  const { user, logout } = useStore();
+  const { user, logout, wsConnected } = useStore();
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border-default)] bg-[rgba(13,17,23,0.8)] backdrop-blur-2xl backdrop-saturate-[180%] px-6 h-16 flex items-center justify-between font-sans">
@@ -13,6 +13,16 @@ export default function Navbar() {
         <span className="hidden sm:block h-5 w-px bg-[var(--border-default)] mx-1"></span>
         <span className="hidden sm:inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-widest text-[var(--text-muted)] uppercase bg-[var(--surface)] border border-[var(--border-default)] px-3 py-1 rounded-full">
           {user?.role === "ADMIN" ? "Administración" : user?.role === "MESERO" ? "Mesero / Salón" : "Cocina"}
+        </span>
+        
+        {/* Connection status indicator */}
+        <span className={`inline-flex items-center gap-1.5 text-[0.6875rem] font-extrabold px-2.5 py-1 rounded-full border transition-all duration-300 ${
+          wsConnected 
+            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+            : "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse"
+        }`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${wsConnected ? "bg-emerald-400" : "bg-red-400 animate-ping"}`}></span>
+          {wsConnected ? "En vivo" : "Sin conexión"}
         </span>
       </div>
 

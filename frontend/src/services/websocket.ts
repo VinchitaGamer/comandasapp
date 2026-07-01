@@ -1,11 +1,36 @@
 import { useStore } from "../store";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+// Helper to determine the WebSocket URL dynamically based on environment and browser context
+const getWebSocketUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+  if (envUrl && envUrl.trim() !== "") {
+    return envUrl;
+  }
+
+  // If running in the browser, construct a dynamic URL relative to the current location
+  if (typeof window !== "undefined") {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const hostname = window.location.hostname;
+    
+    // In local development, Next.js runs on 3000 (or similar) while FastAPI runs on 8000
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${protocol}//${hostname}:8000/ws`;
+    }
+    
+    // In production (VPS), Nginx handles reverse proxying on the same host/port under /ws
+    return `${protocol}//${window.location.host}/ws`;
+  }
+  
+  // Server-side fallback (if any)
+  return "ws://localhost:8000/ws";
+};
 
 let socket: WebSocket | null = null;
 let reconnectTimeout: any = null;
+let pingInterval: any = null;
 let reconnectDelay = 1000;
 const MAX_RECONNECT_DELAY = 30000;
+const PING_INTERVAL_MS = 25000; // 25 seconds heartbeat to prevent proxy timeouts
 let isExpectedClose = false;
 
 // Custom function to trigger a premium double-chime using browser Web Audio API
@@ -47,23 +72,51 @@ export const playAlertSound = () => {
 };
 
 export const connectWebSocket = (token: string) => {
+  // Clear any existing connections and timers before initializing
   if (socket) {
     socket.close();
   }
+  clearInterval(pingInterval);
 
   isExpectedClose = false;
-  const wsUrlWithToken = `${WS_URL}?token=${encodeURIComponent(token)}`;
+  const wsUrl = getWebSocketUrl();
+  const wsUrlWithToken = `${wsUrl}?token=${encodeURIComponent(token)}`;
+  
+  console.log(`Intentando conectar a WebSocket: ${wsUrl}`);
   socket = new WebSocket(wsUrlWithToken);
 
   socket.onopen = () => {
     console.log("WebSocket conectado exitosamente");
     reconnectDelay = 1000; // Reset reconnect delay on success
     
+    // Update store state
+    useStore.getState().setWsConnected(true);
+    
     // Sync active orders via HTTP after reconnect to avoid missing any status transitions
     useStore.getState().fetchActiveOrders();
+    
+    // If the user is admin, also sync the full list of orders
+    const user = useStore.getState().user;
+    if (user && user.role === "ADMIN") {
+      useStore.getState().fetchAllOrders();
+    }
+
+    // Set up heartbeat ping to keep connection alive
+    clearInterval(pingInterval);
+    pingInterval = setInterval(() => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        // Send heartbeat ping to the backend
+        socket.send("ping");
+      }
+    }, PING_INTERVAL_MS);
   };
 
   socket.onmessage = (event) => {
+    // If it's a heartbeat pong response, we can safely ignore it or log it silently
+    if (event.data === "pong") {
+      return;
+    }
+
     try {
       const data = JSON.parse(event.data);
       const { type, order } = data;
@@ -100,8 +153,11 @@ export const connectWebSocket = (token: string) => {
     }
   };
 
-  socket.onclose = () => {
-    console.log("WebSocket desconectado");
+  socket.onclose = (event) => {
+    console.log("WebSocket desconectado:", event.reason || "Sin razón especificada");
+    useStore.getState().setWsConnected(false);
+    clearInterval(pingInterval);
+
     if (!isExpectedClose) {
       // Exponential backoff reconnect
       clearTimeout(reconnectTimeout);
@@ -115,12 +171,15 @@ export const connectWebSocket = (token: string) => {
 
   socket.onerror = (error) => {
     console.error("Error en conexión WebSocket:", error);
+    useStore.getState().setWsConnected(false);
   };
 };
 
 export const disconnectWebSocket = () => {
   isExpectedClose = true;
   clearTimeout(reconnectTimeout);
+  clearInterval(pingInterval);
+  useStore.getState().setWsConnected(false);
   if (socket) {
     socket.close();
     socket = null;

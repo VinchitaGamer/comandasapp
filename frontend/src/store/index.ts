@@ -75,6 +75,10 @@ interface AppState {
   addOrder: (order: Order) => void;
   updateOrder: (order: Order) => void;
   removeOrder: (orderId: number) => void;
+
+  // Connection state
+  wsConnected: boolean;
+  setWsConnected: (connected: boolean) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -218,4 +222,8 @@ export const useStore = create<AppState>((set, get) => ({
       allOrders: get().allOrders.filter((o) => o.id !== orderId)
     });
   },
+
+  // Connection state
+  wsConnected: false,
+  setWsConnected: (connected) => set({ wsConnected: connected }),
 }));

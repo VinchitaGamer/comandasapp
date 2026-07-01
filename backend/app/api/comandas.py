@@ -171,9 +171,8 @@ async def create_order(
     
     formatted_order = format_order(order_loaded)
     
-    # Notify cocina and admin via Websockets
-    await manager.broadcast_to_role("COCINA", {"type": "NEW_ORDER", "order": formatted_order})
-    await manager.broadcast_to_role("ADMIN", {"type": "NEW_ORDER", "order": formatted_order})
+    # Notify all roles via Websockets of the new order
+    await manager.broadcast_all({"type": "NEW_ORDER", "order": formatted_order})
     
     return formatted_order
 
@@ -219,8 +218,8 @@ async def update_order_status(
     
     # Broadcast updates
     if status_upper == "LISTO":
-        # Alert meseros!
-        await manager.broadcast_to_role("MESERO", {"type": "ORDER_READY", "order": formatted_order})
+        # Broadcast ORDER_READY to all connected roles (waiters will chime/toast, others will just update)
+        await manager.broadcast_all({"type": "ORDER_READY", "order": formatted_order})
     else:
         # Alert everyone else of standard update
         await manager.broadcast_all({"type": "ORDER_UPDATED", "order": formatted_order})

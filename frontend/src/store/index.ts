@@ -92,26 +92,26 @@ export const useStore = create<AppState>((set, get) => ({
   user: null,
   token: null,
   login: (user, token) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(user));
     set({ user, token });
   },
   logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     set({ user: null, token: null, cart: [], tableNumber: "", orders: [], allOrders: [] });
   },
   initializeAuth: () => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
+      const token = sessionStorage.getItem("token");
+      const userStr = sessionStorage.getItem("user");
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
           set({ token, user });
         } catch (e) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("user");
         }
       }
     }

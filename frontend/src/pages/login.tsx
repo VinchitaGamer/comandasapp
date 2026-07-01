@@ -22,6 +22,69 @@ export default function Login() {
     }
   }, [token, user, router]);
 
+  // Auto-login for demo purposes
+  useEffect(() => {
+    if (!router.isReady) return;
+    
+    const demoRole = router.query.demo;
+    if (!demoRole) return;
+
+    let demoUser = "";
+    let demoPass = "";
+
+    if (demoRole === "admin") {
+      demoUser = "admin";
+      demoPass = "admin123";
+    } else if (demoRole === "mesero") {
+      demoUser = "mesero1";
+      demoPass = "mesero123";
+    } else if (demoRole === "cocina") {
+      demoUser = "cocina1";
+      demoPass = "cocina123";
+    }
+
+    if (demoUser && demoPass) {
+      const performAutoLogin = async () => {
+        setLoading(true);
+        setError("");
+        try {
+          const params = new URLSearchParams();
+          params.append("username", demoUser);
+          params.append("password", demoPass);
+
+          const res = await api.post("/auth/login", params, {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          });
+
+          const { access_token, role, username: resUsername } = res.data;
+          
+          const profileRes = await api.get("/auth/me", {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          });
+
+          const loggedInUser: User = {
+            id: profileRes.data.id,
+            username: resUsername,
+            role: role as "ADMIN" | "MESERO" | "COCINA",
+          };
+
+          login(loggedInUser, access_token);
+        } catch (err: any) {
+          console.error("Auto-login error:", err);
+          setError("Error en el inicio de sesión automático de la demo");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      performAutoLogin();
+    }
+  }, [router.isReady, router.query, login]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {

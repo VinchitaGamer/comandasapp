@@ -50,7 +50,7 @@ interface Modifier {
 
 export default function Admin() {
   const router = useRouter();
-  const { user, token, orders, fetchActiveOrders, allOrders, fetchAllOrders } = useStore();
+  const { user, token, orders, fetchActiveOrders, allOrders, fetchAllOrders, startEditingOrder } = useStore();
 
   const [activeTab, setActiveTab] = useState<"reports" | "menu" | "users" | "monitoreo" | "caja">("reports");
 
@@ -67,6 +67,7 @@ export default function Admin() {
   // Magnification Modal state
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<Order | null>(null);
   const [isFullscreenModalOpen, setIsFullscreenModalOpen] = useState(false);
+  const [monitoreoSubTab, setMonitoreoSubTab] = useState<"activas" | "historial">("activas");
 
   const fetchActiveArqueo = async () => {
     try {
@@ -153,14 +154,15 @@ export default function Admin() {
     }
   };
 
-  const handleCancelOrder = async (orderId: number) => {
-    if (!confirm("¿Está seguro que desea cancelar y eliminar esta comanda? Esta acción no se puede deshacer.")) return;
+  const handleDeleteOrder = async (orderId: number) => {
+    if (!confirm("¿Está seguro que desea eliminar esta comanda permanentemente? Esta acción no se puede deshacer.")) return;
     try {
       await api.delete(`/comandas/${orderId}`);
       fetchActiveOrders();
+      fetchAllOrders();
     } catch (e) {
-      console.error("Error al cancelar comanda:", e);
-      alert("Error al cancelar la comanda. Es posible que pertenezca a un arqueo cerrado.");
+      console.error("Error al eliminar comanda:", e);
+      alert("Error al eliminar la comanda. Es posible que pertenezca a un arqueo cerrado.");
     }
   };
 
@@ -614,94 +616,162 @@ export default function Admin() {
           {/* TAB 4: REAL-TIME ROOM MONITORING */}
           {activeTab === "monitoreo" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-extrabold text-[var(--text-primary)]">Monitoreo de Sala en Tiempo Real</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h2 className="text-xl font-extrabold text-[var(--text-primary)]">Monitoreo de Sala en Tiempo Real</h2>
+                
+                {/* Sub-tabs Selector */}
+                <div className="flex rounded-xl bg-[var(--surface-dim)] p-1 border border-[var(--border-default)] w-fit">
+                  <button
+                    onClick={() => setMonitoreoSubTab("activas")}
+                    className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                      monitoreoSubTab === "activas"
+                        ? "bg-[var(--surface-bright)] text-emerald-400 shadow-md"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    Comandas Activas ({orders.length})
+                  </button>
+                  <button
+                    onClick={() => setMonitoreoSubTab("historial")}
+                    className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                      monitoreoSubTab === "historial"
+                        ? "bg-[var(--surface-bright)] text-emerald-400 shadow-md"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    Historial (24h) ({allOrders.filter(o => o.status === "ENTREGADO" || o.status === "CANCELADO").length})
+                  </button>
+                </div>
+              </div>
               
-              {orders.length === 0 ? (
-                <div className="text-center py-16 rounded-[20px] border border-dashed border-[var(--border-default)] bg-[var(--surface)]">
-                  <Activity className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-[var(--text-secondary)]">No hay comandas activas en la sala.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {orders.map((order) => {
-                    const isPending = order.status === "PENDIENTE";
-                    const isProcessing = order.status === "EN_PROCESO";
-                    const isReady = order.status === "LISTO";
+              {(() => {
+                const displayedOrders = monitoreoSubTab === "activas"
+                  ? orders
+                  : allOrders.filter(o => o.status === "ENTREGADO" || o.status === "CANCELADO");
 
-                    return (
-                      <div
-                        key={order.id}
-                        onClick={() => {
-                          setSelectedOrderForDetails(order);
-                          setIsFullscreenModalOpen(true);
-                        }}
-                        className="cursor-pointer rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex flex-col justify-between hover:border-[var(--border-hover)] transition-colors"
-                      >
-                        <div>
-                          {/* Card Header */}
-                          <div className="flex justify-between items-start border-b border-[rgba(30,41,59,0.5)] pb-3 mb-4">
-                            <div>
-                              <h4 className="font-extrabold text-[var(--text-primary)] text-base">Mesa {order.table_number}</h4>
-                              <span className="text-xs text-[var(--text-muted)]">#{order.id} • Mesero: {order.waiter_username}</span>
+                if (displayedOrders.length === 0) {
+                  return (
+                    <div className="text-center py-16 rounded-[20px] border border-dashed border-[var(--border-default)] bg-[var(--surface)]">
+                      <Activity className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-3" />
+                      <p className="text-sm font-semibold text-[var(--text-secondary)]">
+                        {monitoreoSubTab === "activas" 
+                          ? "No hay comandas activas en la sala." 
+                          : "No hay comandas registradas en el historial de las últimas 24h."}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {displayedOrders.map((order) => {
+                      const isPending = order.status === "PENDIENTE";
+                      const isProcessing = order.status === "EN_PROCESO";
+                      const isReady = order.status === "LISTO";
+                      const isCompleted = order.status === "ENTREGADO";
+                      const isCanceled = order.status === "CANCELADO";
+
+                      return (
+                        <div
+                          key={order.id}
+                          onClick={() => {
+                            setSelectedOrderForDetails(order);
+                            setIsFullscreenModalOpen(true);
+                          }}
+                          className="cursor-pointer rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex flex-col justify-between hover:border-[var(--border-hover)] transition-colors"
+                        >
+                          <div>
+                            {/* Card Header */}
+                            <div className="flex justify-between items-start border-b border-[rgba(30,41,59,0.5)] pb-3 mb-4">
+                              <div>
+                                <h4 className="font-extrabold text-[var(--text-primary)] text-base">Mesa {order.table_number}</h4>
+                                <span className="text-xs text-[var(--text-muted)]">#{order.id} • Mesero: {order.waiter_username}</span>
+                              </div>
+                              <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${
+                                isReady 
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                                  : isProcessing 
+                                  ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                                  : isCompleted
+                                  ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                                  : isCanceled
+                                  ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                  : "bg-[var(--surface-highest)] text-[var(--text-secondary)]"
+                              }`}>
+                                {order.status}
+                              </span>
                             </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${
-                              isReady 
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                                : isProcessing 
-                                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" 
-                                : "bg-[var(--surface-highest)] text-[var(--text-secondary)]"
-                            }`}>
-                              {order.status}
-                            </span>
+
+                            {/* Items List */}
+                            <ul className="space-y-2 mb-4">
+                              {order.details.map((detail) => (
+                                <li key={detail.id} className="text-xs text-[var(--text-secondary)]">
+                                  <strong>{detail.quantity}x</strong> {detail.plate_name}
+                                  {detail.comment && <span className="text-red-400 block text-[10px] italic">"{detail.comment}"</span>}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
 
-                          {/* Items List */}
-                          <ul className="space-y-2 mb-4">
-                            {order.details.map((detail) => (
-                              <li key={detail.id} className="text-xs text-[var(--text-secondary)]">
-                                <strong>{detail.quantity}x</strong> {detail.plate_name}
-                                {detail.comment && <span className="text-red-400 block text-[10px] italic">"{detail.comment}"</span>}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Footer Actions */}
-                        <div className="border-t border-[rgba(30,41,59,0.5)] pt-4 mt-auto">
-                          <div className="flex justify-between items-center text-xs mb-3">
-                            <span className="text-[var(--text-muted)] font-bold">Total:</span>
-                            <span className="font-extrabold text-[var(--text-primary)]">Bs {order.total_price.toFixed(2)}</span>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            {/* State advance button */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUpdateOrderStatus(order.id, order.status);
-                              }}
-                              className="flex-1 rounded-xl bg-[var(--surface-highest)] hover:bg-[var(--surface-bright)] text-[var(--text-secondary)] font-bold py-2 text-xs transition-colors flex items-center justify-center gap-1.5"
-                            >
-                              Avance Estado
-                            </button>
+                          {/* Footer Actions */}
+                          <div className="border-t border-[rgba(30,41,59,0.5)] pt-4 mt-auto">
+                            <div className="flex justify-between items-center text-xs mb-3">
+                              <span className="text-[var(--text-muted)] font-bold">Total:</span>
+                              <span className="font-extrabold text-[var(--text-primary)]">Bs {order.total_price.toFixed(2)}</span>
+                            </div>
                             
-                            {/* Cancellation button */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCancelOrder(order.id);
-                              }}
-                              className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold px-3 py-2 text-xs transition-colors"
-                            >
-                              Cancelar
-                            </button>
+                            {/* Payment details for completed orders */}
+                            {isCompleted && order.payment_method && (
+                              <div className="text-[10px] text-emerald-400 font-bold mb-3 uppercase tracking-wider">
+                                Pagado con: {order.payment_method}
+                              </div>
+                            )}
+
+                            <div className="flex gap-2">
+                              {/* State advance button - only for active orders */}
+                              {!isCompleted && !isCanceled && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUpdateOrderStatus(order.id, order.status);
+                                  }}
+                                  className="flex-1 rounded-xl bg-[var(--surface-highest)] hover:bg-[var(--surface-bright)] text-[var(--text-secondary)] font-bold py-2 text-xs transition-colors flex items-center justify-center gap-1.5"
+                                >
+                                  Avance Estado
+                                </button>
+                              )}
+
+                              {/* Edit button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startEditingOrder(order);
+                                  router.push("/mesero");
+                                }}
+                                className="flex-1 rounded-xl border border-[var(--border-default)] bg-[var(--surface)] hover:bg-[var(--surface-bright)] text-[var(--text-secondary)] font-bold py-2 text-xs transition-colors flex items-center justify-center gap-1.5"
+                              >
+                                Editar
+                              </button>
+                              
+                              {/* Delete button (exclusivo Admin) */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteOrder(order.id);
+                                }}
+                                className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold px-3 py-2 text-xs transition-colors flex items-center justify-center"
+                                title="Eliminar Comanda Permanentemente"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -1316,6 +1386,10 @@ export default function Admin() {
         onClose={() => setIsFullscreenModalOpen(false)}
         role={user?.role || null}
         onAction={handleUpdateOrderStatus}
+        onEdit={(order) => {
+          startEditingOrder(order);
+          router.push("/mesero");
+        }}
       />
     </div>
   );

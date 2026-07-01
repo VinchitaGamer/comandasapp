@@ -11,7 +11,7 @@ from app.models.user import User
 from app.models.plate import Plate, Modifier
 from app.models.order import Order, OrderDetail, OrderDetailModifier
 from app.models.arqueo import Arqueo
-from app.schemas.order import OrderCreate, OrderResponse, OrderPaymentUpdate
+from app.schemas.order import OrderCreate, OrderResponse, OrderPaymentUpdate, OrderUpdate
 from app.core.security import get_current_user_payload, RoleChecker, decode_token
 
 # SSE Manager for real-time updates
@@ -407,3 +407,114 @@ async def sse_endpoint(token: str = Query(...)):
             "Connection": "keep-alive"
         }
     )
+
+
+@router.put("/{order_id}", response_model=OrderResponse)
+async def update_order(
+    order_id: int,
+    order_in: OrderUpdate,
+    db: Session = Depends(get_db),
+    user_payload: dict = Depends(any_role)
+):
+    # Fetch existing order
+    order = db.query(Order).options(
+        joinedload(Order.waiter),
+        joinedload(Order.details).joinedload(OrderDetail.plate),
+        joinedload(Order.details).joinedload(OrderDetail.modifiers).joinedload(OrderDetailModifier.modifier)
+    ).filter(Order.id == order_id).first()
+    
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comanda no encontrada")
+        
+    # Check if associated with a closed arqueo
+    if order.arqueo_id:
+        closed_arqueo = db.query(Arqueo).filter(Arqueo.id == order.arqueo_id, Arqueo.status == "CERRADO").first()
+        if closed_arqueo:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No se puede modificar una comanda asociada a un arqueo cerrado"
+            )
+
+    # Role validation (Waiters and Admin can modify)
+    role = user_payload.get("role")
+    if role not in ["MESERO", "ADMIN"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Solo los meseros o administradores pueden modificar comandas")
+
+    # Update table number if provided
+    if order_in.table_number is not None:
+        order.table_number = order_in.table_number
+
+    # Delete existing details and modifiers
+    detail_ids = [d.id for d in order.details]
+    if detail_ids:
+        db.query(OrderDetailModifier).filter(OrderDetailModifier.detail_id.in_(detail_ids)).delete(synchronize_session=False)
+        db.query(OrderDetail).filter(OrderDetail.order_id == order_id).delete(synchronize_session=False)
+
+    # Process new details
+    for item in order_in.items:
+        # Verify plate exists and is visible
+        plate = db.query(Plate).filter(Plate.id == item.plate_id).first()
+        if not plate:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Plato ID {item.plate_id} no existe")
+        if not plate.is_visible:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Plato {plate.name} no está disponible para ordenar")
+            
+        detail = OrderDetail(
+            order_id=order.id,
+            plate_id=item.plate_id,
+            quantity=item.quantity,
+            comment=item.comment
+        )
+        db.add(detail)
+        db.flush()  # Populates detail.id
+        
+        # Verify and add modifiers
+        for mod_id in item.modifier_ids:
+            modifier = db.query(Modifier).filter(Modifier.id == mod_id, Modifier.plate_id == item.plate_id).first()
+            if not modifier:
+                db.rollback()
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Modificador ID {mod_id} no existe o no corresponde a este plato")
+            if not modifier.is_available:
+                db.rollback()
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Modificador {modifier.name} no está disponible")
+                
+            odm = OrderDetailModifier(
+                detail_id=detail.id,
+                modifier_id=mod_id
+            )
+            db.add(odm)
+            
+    # Revert status if order was completed (ENTREGADO) or CANCELADO
+    original_status = order.status
+    if original_status in ["ENTREGADO", "CANCELADO"]:
+        order.status = "PENDIENTE"
+        # Reset payment details
+        order.payment_method = None
+        order.payment_cash = 0.0
+        order.payment_qr = 0.0
+        order.payment_card = 0.0
+        order.arqueo_id = None
+        
+    order.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    db.refresh(order)
+    
+    # Reload order with all relations
+    order_loaded = db.query(Order).options(
+        joinedload(Order.waiter),
+        joinedload(Order.details).joinedload(OrderDetail.plate),
+        joinedload(Order.details).joinedload(OrderDetail.modifiers).joinedload(OrderDetailModifier.modifier)
+    ).filter(Order.id == order.id).first()
+    
+    formatted_order = format_order(order_loaded)
+    
+    # Broadcast updates via SSE
+    if original_status in ["ENTREGADO", "CANCELADO"]:
+        # Recreated/reopened order is treated as NEW_ORDER for active screens
+        await sse_manager.broadcast({"type": "NEW_ORDER", "order": formatted_order})
+    else:
+        await sse_manager.broadcast({"type": "ORDER_UPDATED", "order": formatted_order})
+        
+    return formatted_order

@@ -8,6 +8,7 @@ interface FullscreenOrderModalProps {
   onClose: () => void;
   role: string | null;
   onAction?: (orderId: number, currentStatus: string) => Promise<void> | void;
+  onEdit?: (order: Order) => void;
 }
 
 export default function FullscreenOrderModal({
@@ -15,7 +16,8 @@ export default function FullscreenOrderModal({
   isOpen,
   onClose,
   role,
-  onAction
+  onAction,
+  onEdit
 }: FullscreenOrderModalProps) {
   if (!isOpen || !order) return null;
 
@@ -158,6 +160,18 @@ export default function FullscreenOrderModal({
                 <Check className="h-6 w-6 stroke-[3]" />
               )}
               {getActionButtonText()}
+            </button>
+          )}
+
+          {onEdit && (role === "MESERO" || role === "ADMIN") && (
+            <button
+              onClick={() => {
+                onEdit(order);
+                onClose();
+              }}
+              className="flex-1 md:flex-none rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-8 py-5 text-lg font-bold text-indigo-400 hover:text-indigo-300 transition-all"
+            >
+              Editar Pedido
             </button>
           )}
 

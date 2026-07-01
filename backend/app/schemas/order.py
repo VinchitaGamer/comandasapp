@@ -50,3 +50,9 @@ class OrderPaymentUpdate(BaseModel):
     payment_qr: float = 0.0
     payment_card: float = 0.0
 
+
+class OrderUpdate(BaseModel):
+    table_number: Optional[int] = None
+    items: List[OrderDetailCreate]
+
+

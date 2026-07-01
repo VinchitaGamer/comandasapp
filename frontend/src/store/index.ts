@@ -79,6 +79,12 @@ interface AppState {
   // Connection state
   wsConnected: boolean;
   setWsConnected: (connected: boolean) => void;
+
+  // Editing state
+  editingOrderId: number | null;
+  setEditingOrderId: (id: number | null) => void;
+  startEditingOrder: (order: Order) => void;
+  cancelEditingOrder: () => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -226,4 +232,36 @@ export const useStore = create<AppState>((set, get) => ({
   // Connection state
   wsConnected: false,
   setWsConnected: (connected) => set({ wsConnected: connected }),
+
+  // Editing state
+  editingOrderId: null,
+  setEditingOrderId: (editingOrderId) => set({ editingOrderId }),
+  startEditingOrder: (order) => {
+    const cartItems: CartItem[] = order.details.map((detail) => ({
+      plate_id: detail.plate_id,
+      name: detail.plate_name,
+      base_price: detail.plate_price,
+      quantity: detail.quantity,
+      comment: detail.comment || "",
+      selected_modifiers: detail.modifiers.map((mod) => ({
+        id: mod.id,
+        plate_id: mod.plate_id,
+        name: mod.name,
+        extra_price: mod.extra_price,
+        is_available: mod.is_available
+      }))
+    }));
+    set({
+      editingOrderId: order.id,
+      tableNumber: order.table_number,
+      cart: cartItems
+    });
+  },
+  cancelEditingOrder: () => {
+    set({
+      editingOrderId: null,
+      tableNumber: "",
+      cart: []
+    });
+  },
 }));

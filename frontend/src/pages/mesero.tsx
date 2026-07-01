@@ -51,7 +51,10 @@ export default function Mesero() {
     removeFromCart, 
     clearCart,
     fetchActiveOrders,
-    updateOrder
+    updateOrder,
+    editingOrderId,
+    startEditingOrder,
+    cancelEditingOrder
   } = useStore();
 
   // Component states
@@ -176,9 +179,18 @@ export default function Mesero() {
         }))
       };
 
-      const res = await api.post("/comandas", payload);
-      // Success! Clear state
-      clearCart();
+      if (editingOrderId) {
+        await api.put(`/comandas/${editingOrderId}`, payload);
+        cancelEditingOrder();
+        if (user && user.role === "ADMIN") {
+          router.push("/admin");
+          return;
+        }
+      } else {
+        await api.post("/comandas", payload);
+        clearCart();
+      }
+
       // Switch tab to view orders
       setActiveTab("comandas");
       // Reload orders to ensure synchronization
@@ -522,21 +534,30 @@ export default function Mesero() {
                               <span className="text-base font-black text-[var(--text-primary)]">Bs {order.total_price.toFixed(2)}</span>
                             </div>
                             
-                            {isReady ? (
+                            <div className="flex gap-2">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMarkAsDeliveredClick(order);
+                                  startEditingOrder(order);
+                                  setActiveTab("toma");
                                 }}
-                                className="rounded-[14px] bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 py-2.5 text-xs font-bold text-[var(--primary-on)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-500/25"
+                                className="rounded-xl border border-[var(--border-default)] bg-[var(--surface)] hover:bg-[var(--surface-bright)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] transition-colors"
                               >
-                                <CheckCircle className="h-4 w-4" /> Marcar Entregado
+                                Editar
                               </button>
-                            ) : (
-                              <span className="text-xs font-medium text-[var(--text-muted)] flex items-center gap-1.5">
-                                <span className="h-2 w-2 rounded-full bg-[var(--surface-highest)]"></span> Esperando cocina
-                              </span>
-                            )}
+                              
+                              {isReady && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMarkAsDeliveredClick(order);
+                                  }}
+                                  className="rounded-[14px] bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 py-2 text-xs font-bold text-[var(--primary-on)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-500/25"
+                                >
+                                  <CheckCircle className="h-4 w-4" /> Marcar Entregado
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -599,8 +620,20 @@ export default function Mesero() {
 
                           {/* Footer */}
                           <div className="border-t border-[var(--border-default)] pt-3 mt-auto flex justify-between items-center text-xs">
-                            <span className="text-[var(--text-muted)] font-bold">Total</span>
-                            <span className="font-extrabold text-[var(--text-primary)]">Bs {order.total_price.toFixed(2)}</span>
+                            <div>
+                              <span className="text-[var(--text-muted)] font-bold">Total:</span>
+                              <span className="font-extrabold text-[var(--text-primary)] ml-1">Bs {order.total_price.toFixed(2)}</span>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditingOrder(order);
+                                setActiveTab("toma");
+                              }}
+                              className="rounded-lg border border-[var(--border-default)] bg-[var(--surface)] hover:bg-[var(--surface-bright)] px-2.5 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-colors"
+                            >
+                              Editar
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -618,8 +651,23 @@ export default function Mesero() {
           <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-3 mb-6">
             <div className="flex items-center gap-2">
               <ShoppingBag className="h-5 w-5 text-emerald-400" />
-              <h3 className="font-extrabold text-[var(--text-primary)] text-base">Comanda Actual</h3>
+              <h3 className="font-extrabold text-[var(--text-primary)] text-base">
+                {editingOrderId ? `Editando Comanda #${editingOrderId}` : "Comanda Actual"}
+              </h3>
             </div>
+            {editingOrderId && (
+              <button
+                onClick={() => {
+                  cancelEditingOrder();
+                  if (user && user.role === "ADMIN") {
+                    router.push("/admin");
+                  }
+                }}
+                className="text-xs font-bold text-red-400 hover:text-red-300 border border-red-500/20 bg-red-500/5 px-2.5 py-1 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
 
           {errorMsg && (
@@ -728,10 +776,10 @@ export default function Mesero() {
                 {submittingOrder ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--primary-on)] border-t-transparent"></span>
-                    Enviando a Cocina...
+                    {editingOrderId ? "Guardando Cambios..." : "Enviando a Cocina..."}
                   </>
                 ) : (
-                  "Enviar Comanda a Cocina"
+                  editingOrderId ? "Guardar Cambios" : "Enviar Comanda a Cocina"
                 )}
               </button>
             </div>
@@ -783,6 +831,10 @@ export default function Mesero() {
         onClose={() => setIsFullscreenModalOpen(false)}
         role={user?.role || null}
         onAction={handleFullscreenAction}
+        onEdit={(order) => {
+          startEditingOrder(order);
+          setActiveTab("toma");
+        }}
       />
 
       {/* Split/Digital Payment Modal */}

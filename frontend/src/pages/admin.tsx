@@ -460,74 +460,74 @@ export default function Admin() {
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Navigation bar for Admin section */}
-        <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-[var(--border-default)] bg-[var(--surface-container)] p-6 flex lg:flex-col gap-2 shrink-0">
+        <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-[var(--border-default)] bg-[var(--surface-container)] p-3 lg:p-6 flex flex-row lg:flex-col gap-2 shrink-0 overflow-x-auto lg:overflow-x-visible scrollbar-none">
           <button
             onClick={() => setActiveTab("reports")}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+            className={`flex lg:w-full items-center gap-2 lg:gap-3 rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 text-xs lg:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
               activeTab === "reports"
-                ? "bg-[var(--primary-muted)] text-emerald-400 border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
+                ? "bg-[var(--primary-muted)] text-emerald-400 border-b-2 lg:border-b-0 lg:border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-bright)]"
             }`}
           >
-            <BarChart3 className="h-5 w-5" /> Reportes y Métricas
+            <BarChart3 className="h-4 w-4 lg:h-5 lg:w-5" /> Reportes y Métricas
           </button>
 
           <button
             onClick={() => setActiveTab("monitoreo")}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+            className={`flex lg:w-full items-center gap-2 lg:gap-3 rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 text-xs lg:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
               activeTab === "monitoreo"
-                ? "bg-[var(--primary-muted)] text-emerald-400 border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
+                ? "bg-[var(--primary-muted)] text-emerald-400 border-b-2 lg:border-b-0 lg:border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-bright)]"
             }`}
           >
-            <Tv className="h-5 w-5" /> Monitoreo de Sala
+            <Tv className="h-4 w-4 lg:h-5 lg:w-5" /> Monitoreo de Sala
           </button>
 
           <button
             onClick={() => setActiveTab("caja")}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+            className={`flex lg:w-full items-center gap-2 lg:gap-3 rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 text-xs lg:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
               activeTab === "caja"
-                ? "bg-[var(--primary-muted)] text-emerald-400 border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
+                ? "bg-[var(--primary-muted)] text-emerald-400 border-b-2 lg:border-b-0 lg:border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-bright)]"
             }`}
           >
-            <Calculator className="h-5 w-5" /> Caja y Arqueo
+            <Calculator className="h-4 w-4 lg:h-5 lg:w-5" /> Caja y Arqueo
           </button>
           
           <button
             onClick={() => setActiveTab("menu")}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+            className={`flex lg:w-full items-center gap-2 lg:gap-3 rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 text-xs lg:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
               activeTab === "menu"
-                ? "bg-[var(--primary-muted)] text-emerald-400 border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
+                ? "bg-[var(--primary-muted)] text-emerald-400 border-b-2 lg:border-b-0 lg:border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-bright)]"
             }`}
           >
-            <BookOpen className="h-5 w-5" /> Gestión de Menú
+            <BookOpen className="h-4 w-4 lg:h-5 lg:w-5" /> Gestión de Menú
           </button>
           
           <button
             onClick={() => setActiveTab("users")}
-            className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+            className={`flex lg:w-full items-center gap-2 lg:gap-3 rounded-xl px-3.5 py-2.5 lg:px-4 lg:py-3 text-xs lg:text-sm font-bold transition-all shrink-0 whitespace-nowrap ${
               activeTab === "users"
-                ? "bg-[var(--primary-muted)] text-emerald-400 border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
+                ? "bg-[var(--primary-muted)] text-emerald-400 border-b-2 lg:border-b-0 lg:border-l-2 border-emerald-400 shadow-lg shadow-emerald-500/10"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-bright)]"
             }`}
           >
-            <Users className="h-5 w-5" /> Gestión de Personal
+            <Users className="h-4 w-4 lg:h-5 lg:w-5" /> Gestión de Personal
           </button>
         </aside>
 
         {/* Right side: Dynamic view panels */}
-        <section className="flex-1 p-6 overflow-y-auto space-y-6">
+        <section className="flex-1 p-4 lg:p-6 overflow-y-auto space-y-4 lg:space-y-6">
           
           {/* TAB 1: REPORTS & ANALYTICS */}
           {activeTab === "reports" && (
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6">
               <h2 className="text-xl font-extrabold text-[var(--text-primary)]">Resumen Operativo (Mesas del Día)</h2>
               
               {/* Metric Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
                   <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                     <DollarSign className="h-6 w-6" />
                   </div>
@@ -537,7 +537,7 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
                   <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
                     <ShoppingBag className="h-6 w-6" />
                   </div>
@@ -547,7 +547,7 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
                   <div className="rounded-xl bg-yellow-500/10 p-3 text-yellow-400">
                     <Activity className="h-6 w-6 animate-pulse" />
                   </div>
@@ -557,7 +557,7 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex items-center gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
                   <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                     <TrendingUp className="h-6 w-6" />
                   </div>
@@ -569,10 +569,10 @@ export default function Admin() {
               </div>
 
               {/* Leaderboard and order activity split */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
                 
                 {/* Top dishes chart block */}
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-6 space-y-4">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-6 space-y-4">
                   <h3 className="text-base font-extrabold text-[var(--text-primary)]">Platos más Pedidos</h3>
                   
                   {getMostOrderedItems().length === 0 ? (
@@ -599,7 +599,7 @@ export default function Admin() {
                 </div>
 
                 {/* General operational message */}
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-6 flex flex-col justify-center text-center space-y-3">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-6 flex flex-col justify-center text-center space-y-3">
                   <span className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
                     <Activity className="h-5 w-5" />
                   </span>
@@ -620,10 +620,10 @@ export default function Admin() {
                 <h2 className="text-xl font-extrabold text-[var(--text-primary)]">Monitoreo de Sala en Tiempo Real</h2>
                 
                 {/* Sub-tabs Selector */}
-                <div className="flex rounded-xl bg-[var(--surface-dim)] p-1 border border-[var(--border-default)] w-fit">
+                <div className="flex rounded-xl bg-[var(--surface-dim)] p-1 border border-[var(--border-default)] w-full sm:w-fit">
                   <button
                     onClick={() => setMonitoreoSubTab("activas")}
-                    className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 text-xs font-bold transition-all ${
                       monitoreoSubTab === "activas"
                         ? "bg-[var(--surface-bright)] text-emerald-400 shadow-md"
                         : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
@@ -633,7 +633,7 @@ export default function Admin() {
                   </button>
                   <button
                     onClick={() => setMonitoreoSubTab("historial")}
-                    className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    className={`flex-1 sm:flex-none text-center rounded-lg px-4 py-2 text-xs font-bold transition-all ${
                       monitoreoSubTab === "historial"
                         ? "bg-[var(--surface-bright)] text-emerald-400 shadow-md"
                         : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
@@ -678,7 +678,7 @@ export default function Admin() {
                             setSelectedOrderForDetails(order);
                             setIsFullscreenModalOpen(true);
                           }}
-                          className="cursor-pointer rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-5 flex flex-col justify-between hover:border-[var(--border-hover)] transition-colors"
+                          className="cursor-pointer rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-5 flex flex-col justify-between hover:border-[var(--border-hover)] transition-colors"
                         >
                           <div>
                             {/* Card Header */}
@@ -790,7 +790,7 @@ export default function Admin() {
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 
                 {/* Active Box Status (Form / Dashboard) */}
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-6 space-y-6">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-6 space-y-4 sm:space-y-6">
                   {!activeArqueo ? (
                     /* APERTURA DE CAJA FORM */
                     <div className="space-y-4">
@@ -897,7 +897,7 @@ export default function Admin() {
 
                 {/* Arqueos History (2/3 width) */}
                 <div className="xl:col-span-2 rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] overflow-hidden">
-                  <div className="p-[14px_20px] border-b border-[var(--border-default)] bg-[var(--surface-container)]">
+                  <div className="p-3.5 sm:p-[14px_20px] border-b border-[var(--border-default)] bg-[var(--surface-container)]">
                     <h3 className="font-bold text-sm text-[var(--text-primary)]">Historial de Arqueos (Cierres Pasados)</h3>
                   </div>
                   
@@ -908,35 +908,35 @@ export default function Admin() {
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b border-[rgba(30,41,59,0.5)] bg-[var(--surface-container)] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-[var(--text-muted)]">
-                            <th className="p-[14px_20px]">ID</th>
-                            <th className="p-[14px_20px]">Cajero</th>
-                            <th className="p-[14px_20px]">Apertura / Cierre</th>
-                            <th className="p-[14px_20px]">Monto Inicial</th>
-                            <th className="p-[14px_20px]">Calculado</th>
-                            <th className="p-[14px_20px]">Físico</th>
-                            <th className="p-[14px_20px]">Diferencia</th>
-                            <th className="p-[14px_20px] text-right">PDF</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">ID</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Cajero</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Apertura / Cierre</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Monto Inicial</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Calculado</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Físico</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px]">Diferencia</th>
+                            <th className="p-3 sm:p-4 md:p-[14px_20px] text-right">PDF</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[rgba(30,41,59,0.5)] text-xs">
                           {arqueoHistory.map((a) => (
                             <tr key={a.id} className="hover:bg-[var(--surface-bright)] transition-colors">
-                              <td className="p-[14px_20px] font-bold text-[var(--text-secondary)]">#{a.id}</td>
-                              <td className="p-[14px_20px] text-[var(--text-primary)] font-semibold">{a.username}</td>
-                              <td className="p-[14px_20px] text-[var(--text-secondary)]">
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] font-bold text-[var(--text-secondary)]">#{a.id}</td>
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-primary)] font-semibold">{a.username}</td>
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-secondary)]">
                                 <span className="block">{new Date(a.opened_at).toLocaleDateString()}</span>
                                 <span className="text-[10px] text-[var(--text-muted)]">{new Date(a.closed_at).toLocaleTimeString()}</span>
                               </td>
-                              <td className="p-[14px_20px] text-[var(--text-secondary)]">Bs {a.initial_cash.toFixed(2)}</td>
-                              <td className="p-[14px_20px] text-[var(--text-secondary)]">
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-secondary)]">Bs {a.initial_cash.toFixed(2)}</td>
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-secondary)]">
                                 <span className="block">Efectivo: Bs {a.estimated_cash.toFixed(2)}</span>
                                 <span className="text-[10px] text-[var(--text-muted)]">Elect.: Bs {a.card_sales.toFixed(2)}</span>
                               </td>
-                              <td className="p-[14px_20px] text-[var(--text-primary)] font-bold">Bs {a.actual_cash.toFixed(2)}</td>
-                              <td className={`p-[14px_20px] font-black ${a.difference < 0 ? "text-red-400" : "text-emerald-400"}`}>
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-primary)] font-bold">Bs {a.actual_cash.toFixed(2)}</td>
+                              <td className={`p-3 sm:p-4 md:p-[14px_20px] font-black ${a.difference < 0 ? "text-red-400" : "text-emerald-400"}`}>
                                 Bs {a.difference.toFixed(2)}
                               </td>
-                              <td className="p-[14px_20px] text-right">
+                              <td className="p-3 sm:p-4 md:p-[14px_20px] text-right">
                                 <button
                                   onClick={() => handleDownloadPDF(a.id)}
                                   className="rounded-lg p-2 bg-[var(--surface-highest)] hover:bg-[var(--surface-bright)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all inline-flex"
@@ -985,30 +985,37 @@ export default function Admin() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-[rgba(30,41,59,0.5)] bg-[var(--surface-container)] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-[var(--text-muted)]">
-                          <th className="p-[14px_20px]">Nombre</th>
-                          <th className="p-[14px_20px]">Categoría</th>
-                          <th className="p-[14px_20px]">Precio</th>
-                          <th className="p-[14px_20px] text-center">Visibilidad</th>
-                          <th className="p-[14px_20px] text-right">Acciones</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">Nombre</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">Categoría</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">Precio</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px] text-center">Visibilidad</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px] text-right">Acciones</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[rgba(30,41,59,0.5)] text-sm">
                         {plates.map((plate) => (
                           <tr 
                             key={plate.id} 
-                            onClick={() => setSelectedPlateForModifiers(plate)}
+                            onClick={() => {
+                              setSelectedPlateForModifiers(plate);
+                              if (window.innerWidth < 1280) {
+                                setTimeout(() => {
+                                  document.getElementById("modifiers-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }, 100);
+                              }
+                            }}
                             className={`cursor-pointer transition-colors ${
                               selectedPlateForModifiers?.id === plate.id 
                                 ? "bg-[var(--primary-muted)] hover:bg-emerald-500/10" 
                                 : "hover:bg-[var(--surface-bright)]"
                             }`}
                           >
-                            <td className="p-[14px_20px] font-bold text-[var(--text-primary)]">
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] font-bold text-[var(--text-primary)]">
                               {plate.name}
                             </td>
-                            <td className="p-[14px_20px] text-[var(--text-secondary)]">{plate.category}</td>
-                            <td className="p-[14px_20px] font-black text-emerald-400">Bs {plate.price.toFixed(2)}</td>
-                            <td className="p-[14px_20px]" onClick={(e) => e.stopPropagation()}>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-secondary)]">{plate.category}</td>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] font-black text-emerald-400">Bs {plate.price.toFixed(2)}</td>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px]" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={() => handleTogglePlateVisibility(plate)}
                                 className={`mx-auto flex h-6 w-11 items-center rounded-full transition-all ${
@@ -1018,7 +1025,7 @@ export default function Admin() {
                                 <span className={`h-5 w-5 rounded-full bg-[var(--surface-dim)] transition-all`}></span>
                               </button>
                             </td>
-                            <td className="p-[14px_20px] text-right space-x-2" onClick={(e) => e.stopPropagation()}>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={() => handleEditPlateClick(plate)}
                                 className="rounded-lg p-1.5 text-[var(--text-secondary)] hover:bg-[var(--surface-highest)] hover:text-[var(--text-primary)] transition-all inline-flex"
@@ -1042,7 +1049,7 @@ export default function Admin() {
                 </div>
 
                 {/* Modifiers of selected Plate (1/3 width) */}
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-6 space-y-4">
+                <div id="modifiers-section" className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-6 space-y-4">
                   {selectedPlateForModifiers ? (
                     <>
                       <div className="flex justify-between items-center border-b border-[var(--border-default)] pb-3">
@@ -1170,7 +1177,7 @@ export default function Admin() {
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 
                 {/* Create user form (1/3 width) */}
-                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-6 space-y-6">
+                <div className="rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div className="flex items-center gap-2 border-b border-[var(--border-default)] pb-3 mb-4">
                     <UserPlus className="h-5 w-5 text-emerald-400" />
                     <h3 className="font-extrabold text-[var(--text-primary)] text-base">Registrar Nuevo Colaborador</h3>
@@ -1236,7 +1243,7 @@ export default function Admin() {
 
                 {/* List of registered users (2/3 width) */}
                 <div className="xl:col-span-2 rounded-[20px] border border-[var(--border-default)] bg-[var(--surface)] overflow-hidden">
-                  <div className="p-[14px_20px] border-b border-[var(--border-default)] bg-[var(--surface-container)]">
+                  <div className="p-3.5 sm:p-[14px_20px] border-b border-[var(--border-default)] bg-[var(--surface-container)]">
                     <h3 className="font-bold text-sm text-[var(--text-primary)]">Colaboradores Activos</h3>
                   </div>
                   
@@ -1244,17 +1251,17 @@ export default function Admin() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-[rgba(30,41,59,0.5)] bg-[var(--surface-container)] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-[var(--text-muted)]">
-                          <th className="p-[14px_20px]">ID</th>
-                          <th className="p-[14px_20px]">Nombre de Usuario</th>
-                          <th className="p-[14px_20px]">Rol Asignado</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">ID</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">Nombre de Usuario</th>
+                          <th className="p-3 sm:p-4 md:p-[14px_20px]">Rol Asignado</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[rgba(30,41,59,0.5)] text-sm">
                         {usersList.map((usr) => (
                           <tr key={usr.id} className="hover:bg-[var(--surface-bright)] transition-colors">
-                            <td className="p-[14px_20px] font-bold text-[var(--text-muted)]">#{usr.id}</td>
-                            <td className="p-[14px_20px] text-[var(--text-primary)] font-bold">{usr.username}</td>
-                            <td className="p-[14px_20px]">
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] font-bold text-[var(--text-muted)]">#{usr.id}</td>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px] text-[var(--text-primary)] font-bold">{usr.username}</td>
+                            <td className="p-3 sm:p-4 md:p-[14px_20px]">
                               <span className={`rounded-md px-2.5 py-1 text-[10px] font-bold border uppercase tracking-wider ${
                                 usr.role === "ADMIN" 
                                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"

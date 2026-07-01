@@ -52,27 +52,27 @@ export default function FullscreenOrderModal({
   const isDelayed = elapsedMins >= 15;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--surface-dim)]/[0.98] flex flex-col justify-between p-6 md:p-12 overflow-y-auto animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 bg-[var(--surface-dim)]/[0.98] flex flex-col justify-between p-4 sm:p-6 md:p-12 overflow-y-auto animate-fade-in font-sans">
       
       {/* Top Header Section */}
-      <header className="flex justify-between items-start border-b border-[var(--border-default)] pb-6 mb-6">
+      <header className="flex justify-between items-start border-b border-[var(--border-default)] pb-4 sm:pb-6 mb-4 sm:mb-6">
         <div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-5xl md:text-7xl font-extrabold text-emerald-400 tracking-tight">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold text-emerald-400 tracking-tight">
               MESA {order.table_number}
             </h1>
             {!isReady && order.status !== "ENTREGADO" && order.status !== "CANCELADO" && (
-              <span className={`inline-flex items-center gap-2 text-lg font-extrabold px-4 py-2 rounded-2xl ${
+              <span className={`inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-lg font-extrabold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl ${
                 isDelayed 
                   ? "bg-red-500/15 text-red-400 border border-red-500/25 animate-pulse-urgent" 
                   : "bg-[var(--surface)] text-[var(--text-secondary)] border border-[var(--border-default)]"
               }`}>
-                <Clock className="h-5 w-5" />
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
                 {elapsedMins} min
               </span>
             )}
           </div>
-          <p className="text-sm md:text-lg text-[var(--text-muted)] mt-2 font-semibold">
+          <p className="text-xs sm:text-sm md:text-lg text-[var(--text-muted)] mt-2 font-semibold">
             Comanda #{order.id} • Tomada por: {order.waiter_username} • {new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
           </p>
         </div>
@@ -80,14 +80,14 @@ export default function FullscreenOrderModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="rounded-2xl border-2 border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface)] hover:bg-[var(--surface-bright)] p-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+          className="rounded-xl sm:rounded-2xl border-2 border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface)] hover:bg-[var(--surface-bright)] p-2.5 sm:p-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
         >
-          <X className="h-8 w-8 stroke-[2.5]" />
+          <X className="h-5 w-5 sm:h-8 sm:w-8 stroke-[2.5]" />
         </button>
       </header>
 
       {/* Main Order Details Body */}
-      <main className="flex-1 space-y-6 max-w-4xl w-full mx-auto my-6">
+      <main className="flex-1 space-y-6 max-w-4xl w-full mx-auto my-4 sm:my-6">
         <div className="flex items-center gap-2.5 text-[var(--text-muted)] text-sm font-bold uppercase tracking-widest border-b border-[var(--border-default)] pb-2 mb-4">
           <FileText className="h-5 w-5 text-emerald-400" />
           <span>Detalle de Consumo</span>
@@ -97,24 +97,24 @@ export default function FullscreenOrderModal({
           {order.details.map((detail) => (
             <li key={detail.id} className="pt-4 first:pt-0 pb-4">
               <div className="flex justify-between items-start gap-4">
-                <span className="text-2xl md:text-3xl text-[var(--text-primary)] font-extrabold leading-snug">
-                  <span className="text-[var(--primary-on)] bg-emerald-500 px-3 py-1 rounded-xl text-xl md:text-2xl font-extrabold mr-4 shadow-lg shadow-emerald-500/15">
+                <span className="text-lg sm:text-2xl md:text-3xl text-[var(--text-primary)] font-extrabold leading-snug">
+                  <span className="text-[var(--primary-on)] bg-emerald-500 px-2 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl text-base sm:text-xl md:text-2xl font-extrabold mr-2.5 sm:mr-4 shadow-lg shadow-emerald-500/15">
                     {detail.quantity}x
                   </span>
                   {detail.plate_name}
                 </span>
-                <span className="text-xl md:text-2xl font-extrabold text-[var(--text-muted)] shrink-0">
+                <span className="text-base sm:text-xl md:text-2xl font-extrabold text-[var(--text-muted)] shrink-0">
                   Bs{(detail.plate_price * detail.quantity).toFixed(2)}
                 </span>
               </div>
 
               {/* Modifiers List */}
               {detail.modifiers && detail.modifiers.length > 0 && (
-                <div className="pl-14 mt-3 flex flex-wrap gap-2">
+                <div className="pl-10 sm:pl-14 mt-3 flex flex-wrap gap-2">
                   {detail.modifiers.map((mod) => (
                     <span
                       key={mod.id}
-                      className="text-xs md:text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1 rounded-xl uppercase tracking-wider"
+                      className="text-[10px] sm:text-xs md:text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-lg sm:rounded-xl uppercase tracking-wider"
                     >
                       + {mod.name}
                     </span>
@@ -124,9 +124,9 @@ export default function FullscreenOrderModal({
 
               {/* Red warning card for Comments */}
               {detail.comment && (
-                <div className="pl-14 mt-3">
-                  <div className="flex items-start gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-base md:text-lg text-red-400 font-bold max-w-2xl">
-                    <AlertTriangle className="h-6 w-6 shrink-0 text-red-500 animate-pulse mt-0.5" />
+                <div className="pl-10 sm:pl-14 mt-3">
+                  <div className="flex items-start gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl bg-red-500/10 border border-red-500/20 p-3 sm:p-4 text-sm sm:text-base md:text-lg text-red-400 font-bold max-w-2xl">
+                    <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 text-red-500 animate-pulse mt-0.5" />
                     <p className="italic">&quot;{detail.comment.toUpperCase()}&quot;</p>
                   </div>
                 </div>
@@ -148,16 +148,16 @@ export default function FullscreenOrderModal({
           )}
         </div>
 
-        <div className="flex gap-4 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           {showActionButton && (
             <button
               onClick={handleActionClick}
-              className="flex-1 md:flex-none rounded-2xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-8 py-5 text-lg font-extrabold text-[var(--primary-on)] transition-all hover:brightness-110 hover:-translate-y-0.5 active:scale-[0.98] shadow-2xl shadow-emerald-500/25 flex items-center justify-center gap-3"
+              className="flex-1 sm:flex-none rounded-2xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-6 py-4 sm:px-8 sm:py-5 text-sm sm:text-lg font-extrabold text-[var(--primary-on)] transition-all hover:brightness-110 hover:-translate-y-0.5 active:scale-[0.98] shadow-2xl shadow-emerald-500/25 flex items-center justify-center gap-3"
             >
               {isPending ? (
-                <Play className="h-6 w-6 fill-current" />
+                <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-current" />
               ) : (
-                <Check className="h-6 w-6 stroke-[3]" />
+                <Check className="h-5 w-5 sm:h-6 sm:w-6 stroke-[3]" />
               )}
               {getActionButtonText()}
             </button>
@@ -169,7 +169,7 @@ export default function FullscreenOrderModal({
                 onEdit(order);
                 onClose();
               }}
-              className="flex-1 md:flex-none rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-8 py-5 text-lg font-bold text-indigo-400 hover:text-indigo-300 transition-all"
+              className="flex-1 sm:flex-none rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-6 py-4 sm:px-8 sm:py-5 text-sm sm:text-lg font-bold text-indigo-400 hover:text-indigo-300 transition-all"
             >
               Editar Pedido
             </button>
@@ -177,7 +177,7 @@ export default function FullscreenOrderModal({
 
           <button
             onClick={onClose}
-            className="flex-1 md:flex-none rounded-2xl border border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface)] px-8 py-5 text-lg font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+            className="flex-1 sm:flex-none rounded-2xl border border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface)] px-6 py-4 sm:px-8 sm:py-5 text-sm sm:text-lg font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
           >
             Cerrar Pantalla
           </button>

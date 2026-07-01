@@ -51,6 +51,6 @@ services:
     container_name: comandas_frontend_demo
     restart: always
     ports:
-      - "3001:3000"
+      - "3002:3000"
     depends_on:
       - backend_demo

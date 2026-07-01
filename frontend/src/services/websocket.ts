@@ -1,36 +1,34 @@
 import { useStore } from "../store";
 
-// Helper to determine the WebSocket URL dynamically based on environment and browser context
-const getWebSocketUrl = (): string => {
-  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+// Helper to determine the SSE (Server-Sent Events) URL dynamically based on environment and browser context
+const getSseUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  let baseUrl = "";
+  
   if (envUrl && envUrl.trim() !== "") {
-    return envUrl;
-  }
-
-  // If running in the browser, construct a dynamic URL relative to the current location
-  if (typeof window !== "undefined") {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    baseUrl = envUrl;
+  } else if (typeof window !== "undefined") {
+    // If running in the browser, construct relative to current origin
     const hostname = window.location.hostname;
     
     // In local development, Next.js runs on 3000 (or similar) while FastAPI runs on 8000
     if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return `${protocol}//${hostname}:8000/ws`;
+      baseUrl = `${window.location.protocol}//${hostname}:8000/api`;
+    } else {
+      // In production (VPS), Nginx proxies /api on the same host/port
+      baseUrl = `${window.location.protocol}//${window.location.host}/api`;
     }
-    
-    // In production (VPS), Nginx handles reverse proxying on the same host/port under /ws
-    return `${protocol}//${window.location.host}/ws`;
+  } else {
+    baseUrl = "http://localhost:8000/api";
   }
-  
-  // Server-side fallback (if any)
-  return "ws://localhost:8000/ws";
+
+  return `${baseUrl}/comandas/events`;
 };
 
-let socket: WebSocket | null = null;
+let eventSource: EventSource | null = null;
 let reconnectTimeout: any = null;
-let pingInterval: any = null;
 let reconnectDelay = 1000;
 const MAX_RECONNECT_DELAY = 30000;
-const PING_INTERVAL_MS = 25000; // 25 seconds heartbeat to prevent proxy timeouts
 let isExpectedClose = false;
 
 // Custom function to trigger a premium double-chime using browser Web Audio API
@@ -73,23 +71,22 @@ export const playAlertSound = () => {
 
 export const connectWebSocket = (token: string) => {
   // Clear any existing connections and timers before initializing
-  if (socket) {
-    socket.close();
+  if (eventSource) {
+    eventSource.close();
   }
-  clearInterval(pingInterval);
 
   isExpectedClose = false;
-  const wsUrl = getWebSocketUrl();
-  const wsUrlWithToken = `${wsUrl}?token=${encodeURIComponent(token)}`;
+  const sseUrl = getSseUrl();
+  const sseUrlWithToken = `${sseUrl}?token=${encodeURIComponent(token)}`;
   
-  console.log(`Intentando conectar a WebSocket: ${wsUrl}`);
-  socket = new WebSocket(wsUrlWithToken);
+  console.log(`Intentando conectar a SSE en: ${sseUrl}`);
+  eventSource = new EventSource(sseUrlWithToken);
 
-  socket.onopen = () => {
-    console.log("WebSocket conectado exitosamente");
+  eventSource.onopen = () => {
+    console.log("Conexión SSE establecida con éxito");
     reconnectDelay = 1000; // Reset reconnect delay on success
     
-    // Update store state
+    // Update store state to indicate live status
     useStore.getState().setWsConnected(true);
     
     // Sync active orders via HTTP after reconnect to avoid missing any status transitions
@@ -100,31 +97,20 @@ export const connectWebSocket = (token: string) => {
     if (user && user.role === "ADMIN") {
       useStore.getState().fetchAllOrders();
     }
-
-    // Set up heartbeat ping to keep connection alive
-    clearInterval(pingInterval);
-    pingInterval = setInterval(() => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        // Send heartbeat ping to the backend
-        socket.send("ping");
-      }
-    }, PING_INTERVAL_MS);
   };
 
-  socket.onmessage = (event) => {
-    // If it's a heartbeat pong response, we can safely ignore it or log it silently
-    if (event.data === "pong") {
-      return;
-    }
-
+  eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
       const { type, order } = data;
       const user = useStore.getState().user;
 
-      console.log("Evento WS recibido:", type, order);
+      console.log("Evento SSE recibido:", type, order);
 
       switch (type) {
+        case "CONNECTED":
+          console.log("SSE handshake exitoso.");
+          break;
         case "NEW_ORDER":
           useStore.getState().addOrder(order);
           break;
@@ -149,39 +135,34 @@ export const connectWebSocket = (token: string) => {
           break;
       }
     } catch (e) {
-      console.error("Error al procesar mensaje de WebSocket:", e);
+      console.error("Error al procesar mensaje de SSE:", e);
     }
   };
 
-  socket.onclose = (event) => {
-    console.log("WebSocket desconectado:", event.reason || "Sin razón especificada");
+  eventSource.onerror = (error) => {
+    console.error("Error en conexión SSE:", error);
     useStore.getState().setWsConnected(false);
-    clearInterval(pingInterval);
-
-    if (!isExpectedClose) {
-      // Exponential backoff reconnect
+    
+    // EventSource handles reconnection natively under the hood, 
+    // but in case it enters a closed state, we can force a manual reconnection timeout.
+    if (eventSource && eventSource.readyState === EventSource.CLOSED && !isExpectedClose) {
+      eventSource.close();
       clearTimeout(reconnectTimeout);
       reconnectTimeout = setTimeout(() => {
-        console.log(`Intentando reconectar WS en ${reconnectDelay}ms...`);
+        console.log(`Intentando reconectar SSE en ${reconnectDelay}ms...`);
         connectWebSocket(token);
         reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
       }, reconnectDelay);
     }
-  };
-
-  socket.onerror = (error) => {
-    console.error("Error en conexión WebSocket:", error);
-    useStore.getState().setWsConnected(false);
   };
 };
 
 export const disconnectWebSocket = () => {
   isExpectedClose = true;
   clearTimeout(reconnectTimeout);
-  clearInterval(pingInterval);
   useStore.getState().setWsConnected(false);
-  if (socket) {
-    socket.close();
-    socket = null;
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
   }
 };

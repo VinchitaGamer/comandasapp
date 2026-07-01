@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 import datetime
+import asyncio
+import json
 
 from app.database import get_db
 from app.models.user import User
@@ -9,8 +12,30 @@ from app.models.plate import Plate, Modifier
 from app.models.order import Order, OrderDetail, OrderDetailModifier
 from app.models.arqueo import Arqueo
 from app.schemas.order import OrderCreate, OrderResponse, OrderPaymentUpdate
-from app.core.security import get_current_user_payload, RoleChecker
-from app.websockets.manager import manager
+from app.core.security import get_current_user_payload, RoleChecker, decode_token
+
+# SSE Manager for real-time updates
+class SSEManager:
+    def __init__(self):
+        self.active_queues: List[asyncio.Queue] = []
+
+    def connect(self) -> asyncio.Queue:
+        queue = asyncio.Queue()
+        self.active_queues.append(queue)
+        return queue
+
+    def disconnect(self, queue: asyncio.Queue):
+        if queue in self.active_queues:
+            self.active_queues.remove(queue)
+
+    async def broadcast(self, message: dict):
+        for queue in list(self.active_queues):
+            try:
+                await queue.put(message)
+            except Exception:
+                pass
+
+sse_manager = SSEManager()
 
 router = APIRouter(prefix="/comandas", tags=["Order Management"])
 
@@ -171,8 +196,8 @@ async def create_order(
     
     formatted_order = format_order(order_loaded)
     
-    # Notify all roles via Websockets of the new order
-    await manager.broadcast_all({"type": "NEW_ORDER", "order": formatted_order})
+    # Notify all roles via SSE of the new order
+    await sse_manager.broadcast({"type": "NEW_ORDER", "order": formatted_order})
     
     return formatted_order
 
@@ -219,10 +244,10 @@ async def update_order_status(
     # Broadcast updates
     if status_upper == "LISTO":
         # Broadcast ORDER_READY to all connected roles (waiters will chime/toast, others will just update)
-        await manager.broadcast_all({"type": "ORDER_READY", "order": formatted_order})
+        await sse_manager.broadcast({"type": "ORDER_READY", "order": formatted_order})
     else:
         # Alert everyone else of standard update
-        await manager.broadcast_all({"type": "ORDER_UPDATED", "order": formatted_order})
+        await sse_manager.broadcast({"type": "ORDER_UPDATED", "order": formatted_order})
         
     return formatted_order
 
@@ -303,7 +328,7 @@ async def update_order_payment(
     db.refresh(order)
     
     formatted_order = format_order(order)
-    await manager.broadcast_all({"type": "ORDER_UPDATED", "order": formatted_order})
+    await sse_manager.broadcast({"type": "ORDER_UPDATED", "order": formatted_order})
     
     return formatted_order
 
@@ -333,6 +358,52 @@ async def delete_order(
     db.delete(order)
     db.commit()
     
-    # Broadcast deletion to all WebSocket clients
-    await manager.broadcast_all({"type": "ORDER_DELETED", "order_id": order_id})
+    # Broadcast deletion to all SSE clients
+    await sse_manager.broadcast({"type": "ORDER_DELETED", "order_id": order_id})
     return None
+
+
+@router.get("/events")
+async def sse_endpoint(token: str = Query(...)):
+    """
+    SSE endpoint for real-time updates.
+    """
+    try:
+        # Validate JWT token
+        payload = decode_token(token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido o expirado"
+        )
+
+    queue = sse_manager.connect()
+
+    async def event_generator():
+        try:
+            # Send initial connection success event
+            yield "data: " + json.dumps({"type": "CONNECTED"}) + "\n\n"
+            
+            while True:
+                try:
+                    # Wait for message with a timeout of 20 seconds
+                    message = await asyncio.wait_for(queue.get(), timeout=20.0)
+                    yield f"data: {json.dumps(message)}\n\n"
+                except asyncio.TimeoutError:
+                    # Heartbeat comment to keep connection alive
+                    yield ": keepalive\n\n"
+        except asyncio.CancelledError:
+            # Connection closed by client
+            pass
+        finally:
+            sse_manager.disconnect(queue)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive"
+        }
+    )
